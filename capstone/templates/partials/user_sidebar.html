@@ -1,0 +1,51 @@
+{% load static %}
+<div class="sidebar border border-right col-md-3 col-lg-2 p-0 custom_bg">
+    <img src="{% static 'img/user_profile.png' %}" class="rounded mx-auto d-block my-2" style="height: 100px;" alt="...">
+    <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+        <ul class="nav flex-column custom_bg">
+            <li class="nav-item">
+                <form action="{% url 'Pigs' user_type=user_type %}" method="get">
+                    <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
+                        <svg class="bi icon"><use xlink:href="#house-fill"/></svg>
+                        DASHBOARD
+                    </button>
+                </form> 
+            </li>
+            <li class="nav-item">
+                <form action="{% url 'Add_Pigs' user_type=user_type %}" method="get">
+                    <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
+                        <svg class="bi icon"><use xlink:href="#plus-circle"/></svg>
+                        MANAGE PIGS
+                    </button>
+                </form>
+            </li>
+            <li class="nav-item">
+                <form action="{% url 'set_sched' user_type=user_type %}" method="get">
+                    <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
+                        <svg class="bi icon"><use xlink:href="#calendar3"/></svg>
+                        SET SCHEDULE
+                    </button>
+                </form>
+            </li>
+            <li class="nav-item">
+                <form action="{% url 'data_entry' user_type=user_type %}" method="get">
+                    <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
+                        <svg class="bi icon"><use xlink:href="#list"/></svg>
+                        DATA ENTRY
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+        <ul class="nav flex-column mb-auto custom_bottom">
+            <li class="nav-item">
+                <button class="nav-link d-flex align-items-center gap-2 custom_logout" onclick="window.location.href='http://127.0.0.1:8000/'">
+                    <svg class="bi icon" id="logout-icon">
+                        <use xlink:href="#door-closed"/>
+                    </svg>
+                    Sign out
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>

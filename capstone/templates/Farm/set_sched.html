@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="navbar my-1 d-flex flex-row justify-content-between">
+    <button class="custom_button" id="openOverlayButton" style="border-radius: 20px; width: 120px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;" >Set Schedule</button>
+</div>
+<div id="overlay">
+    <div id="formContainer" class="card rounded">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                SET SCHEDULE
+            </span>
+        </div>
+        <div class="scheduling-container">
+            <form method="post" action="{% url 'set_sched' user_type=user_type %}">
+                {% csrf_token %}
+                <label class="taskname" for="taskname">Task Name:</label>
+                <input class="taskname" type="text" id="taskname" name="taskname"><br><br>
+
+                <label class="duedate" for="duedate">Due Date:</label>
+                <input class="duedate" type="date" id="duedate" name="duedate"><br><br>
+
+                <label class="duetime" for="duetime">Due Time:</label>
+                <input class="duetime" type="time" id="duetime" name="duetime"><br><br>
+
+                <label class="desc" for="desc">Description:</label>
+                <input type="text" class="desc" id="desc" name="desc"><br><br>
+                
+                <div class="d-flex justify-content-end">
+                    <input class="shadow  custom_button" type="submit" value="Save Task" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                    <input class="shadow custom_button" type="button" id="closeOverlayButton" value="Cancel" style="border-radius: 20px; width: 120px;">
+                </div>
+            </form>
+            <div class="error-message" id="error-message">
+                {{ message }}
+            </div>
+        </div>
+    </div>
+</div>
+<div id="calendar"></div>
+<div class="card px-2 custom_sched_box" id="scheduleToday">
+    <div class="mt-2 schedule_header">SCHEDULE TODAY:</div>
+    {% if today_tasks %}
+        {% for task in today_tasks %}
+            <div class="mt-2 p-2 custom_sched_tab">
+                {{ task.task_name }}
+                <label class="checkbox-container">
+                    <input
+                        type="checkbox"
+                        data-task-id="{{ task.id }}"
+                        {% if task.is_done %}checked{% endif %}
+                        onchange="updateTaskStatus(this)"
+                    >
+                    <span class="checkmark"></span>
+                </label>
+            </div>
+        {% endfor %}
+    {% else %}
+        <img src="{% static 'img/No_Task.png' %}" alt="No Tasks Today Image" class="no-task-img">
+        <p class="no-tasks-text">No Tasks Today.</p>
+    {% endif %}
+</div>
+
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 custom_todo_box" id="sample">
+            <h4>To Do</h4>
+            {% for task in todo_tasks %}
+            <div class="card mb-3 custom_todo">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ task.task_name }}</h5>
+                            <p class="card-text">{{ task.description }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="due-details">
+                                <p class="card-text"> {{ task.due_date }} {{ task.due_time }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6 custom_todo_box" id="sample">
+            <h4>Done</h4>
+            {% for task in done_tasks %}
+            <div class="card mb-3 custom_done">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ task.task_name }}</h5>
+                            <p class="card-text">{{ task.description }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="due-details">
+                                <p class="card-text"> {{ task.due_date }} {{ task.due_time }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+             
+    </div>
+</div>
+
+{% endblock %}

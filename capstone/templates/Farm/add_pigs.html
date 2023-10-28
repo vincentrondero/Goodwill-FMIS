@@ -1,0 +1,605 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="navbar my-1 d-flex flex-row justify-content-between">
+    <div class="d-flex" >
+    <button class="custom_button mx-2" id="openOverlayButton" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD PIGS</button>
+    <button class="custom_button mx-2" id="openOverlayButton1" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD SOW</button>
+    </div>  
+</div>
+<div class="row d-flex">
+    <div class="col">
+        <button id="showPigsButton" class="menu_button" style="width: 100%;">Show Pigs</button>
+    </div>
+    <div class="col">
+        <button id="showSowButton" class="menu_button" style="width: 100%;;">Show Sow</button>
+    </div>
+</div>
+
+<div id="sowSection" style="display: none;">
+    <form method="post" action="{% url 'search_sow_suggestions' %}">
+        {% csrf_token %}
+        <input type="text" id="search-sow-input" placeholder="Search Sow..." class="mt-1" style="transform: translate(550%, 15%); border-radius:10px; border-color:#FF7373; border-width:2px;  border-style: solid;">
+    </form>
+    <div id="search-sow-results" style="background-color: #FFFFFF;display: none; height: 200px; width: 10%; overflow-y: auto; position: absolute; right: 8%; top:12%; z-index:3000; transform: translate(45%, 20%)"></div>     
+    <div class="col-12">
+        <div class="card d-flex" style="max-height: 630px; min-height: 630px; background-color: #659D60;">
+            <div class="d-flex justify-content-between">
+                <div class="mx-2 mt-1">
+                    <span class="text-white p-0 fw-bold"><img src="{% static 'img/pig.png' %}" style="height: 50px;" alt="...">Sow</span>
+                </div>
+                <div class="m-3">
+                    <!-- Display the count from pig_list_28_days -->
+                    <span class="text-white p-0 fw-bold">{{ sow_list.count }}</span>
+                </div>
+            </div>
+            <div style=" max-height: 575px; min-height: 575px; overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;  background-color: #F5F1F1; ">
+                <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+                    <div class="d-flex flex-wrap">
+                        {% for sow in sow_list %}
+                        <div class="bg-light border border-dark py-2 m-1 text-decoration-none d-flex justify-content-between" style="width: 32.5%;">
+                            <div class="ms-3">
+                                <span>{{ sow.pig_id }}</span>
+                                <p class="m-0 p-0">Status: {{ sow.remarks }}</p>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <button class="dropdown_dots" data-user-type="{{ user.user_type }}" style="border: none; background: none;">
+                                    <img src="{% static 'img/three_dots.png' %}" style="height: 24px;" alt="...">
+                                </button>
+                                <div id="dropdown" class="dropdown" style="display: none;">
+                                    {% csrf_token %}
+                                    <button class="icon-button sow_perf_button" data-sow-id="{{ sow.id }}" data-user-type="{{ user_type }}">
+                                        <img src="{% static 'img/sow_chart.png' %}" style="height: 20px;" alt="Edit Pig">
+                                    </button>        
+                                    <button class="icon-button edit_sow_button" data-sow-id="{{ sow.id }}" data-user-type="{{ user_type }}">
+                                        <img src="{% static 'img/edit_icon.png' %}" style="height: 24px;" alt="Edit Pig">
+                                    </button>                            
+                                    <button class="icon-button-add-pigs delete_sow_button" data-sow-id="{{ sow.id }}" data-user-type="{{ user_type }}" style="display:none;">
+                                        <img src="{% static 'img/trash_can.png' %}" style="height: 24px;" alt="...">
+                                    </button>                            
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="pigsSection">
+    <form method="post" action="{% url 'search_suggestions' %}">
+        {% csrf_token %}
+        <input type="text" id="search-input" placeholder="Search Pig..." class="mt-1" style="transform: translate(550%, 15%); border-radius:10px; border-color:#FF7373; border-width:2px;  border-style: solid;">
+    </form>
+    <div id="search-results" style="background-color: #FFFFFF;display: none; height: 200px; width: 10%; overflow-y: auto; position: absolute; right: 8%; top:12%; z-index:3000; transform: translate(45%, 15%)"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+                <div class="card" style="max-height: 620px; min-height: 620px; background-color: #F7D355; width: 106%;">
+                    <!-- Patener content -->
+                    <div class="d-flex justify-content-between">
+                        <div class="mx-2 mt-1">
+                            <span class="text-white p-0 fw-bold"><img src="{% static 'img/pig.png' %}" style="height: 50px;" alt="...">Patener</span>
+                        </div>
+                        <div class="m-3">
+                            <!-- Display the count from pig_list_greater_than_148_days -->
+                            <span class="text-white p-0 fw-bold">{{ pig_list_greater_than_148_days.count }}</span>
+                        </div>
+                    </div>
+                    <div style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none; background-color: #FDE387; max-height: 564px; min-height: 564px;">
+                        <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+                            <!-- Content for Patener -->
+                            {% for pig in pig_list_greater_than_148_days %}
+                                <div class="bg-light border border-dark py-2 px-1 mt-1 text-decoration-none d-flex justify-content-between">
+                                    <div>
+                                        <span>{{ pig.pig_id }}</span>
+                                        <p class="m-0 p-0">Status: {{ pig.remarks }}</p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <button class="dropdown_dots" data-user-type="{{ user.user_type }}" style="border: none; background: none;">
+                                            <img src="{% static 'img/three_dots.png' %}" style="height: 24px;" alt="...">
+                                        </button>
+                                        <div class="dropdown" style="display: none;">
+                                            {% csrf_token %}
+                                            <button class="icon-button vaccine_table_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}" onclick="openVaccineOverlay('{{ pig.pig_id }}')">
+                                                <img src="{% static 'img/vaccine_button.png' %}" style="height: 20px;" alt="View Vaccines">
+                                            </button>    
+                                            <button class="icon-button edit_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}">
+                                                <img src="{% static 'img/edit_icon.png' %}" style="height: 24px;" alt="Edit Pig">
+                                            </button>
+                                            <button class="icon-button-add-pigs delete_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}"  style="display:none;">
+                                                <img src="{% static 'img/trash_can.png' %}" style="height: 24px;" alt="...">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <!-- Add more list items as needed for other pig data -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card d-flex" style="max-height: 620px; min-height: 620px; background-color: #F7D355; width: 106%;">
+                    <div class="d-flex justify-content-between">
+                        <div class="mx-2 mt-1">
+                            <span class="text-white p-0 fw-bold"><img src="{% static 'img/pig.png' %}" style="height: 50px;" alt="...">Grower</span>
+                        </div>
+                        <div class="m-3">
+                            <!-- Display the count from pig_list_88_to_148_days -->
+                            <span class="text-white p-0 fw-bold">{{ pig_list_88_to_148_days.count }}</span>
+                        </div>
+                    </div>
+                    <div style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none; background-color: #FDE387; max-height: 564px; min-height: 564px;">
+                        <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+                            <!-- Content for Grower -->
+                            {% for pig in pig_list_88_to_148_days %}
+                                <div class="bg-light border border-dark py-2 px-1 mt-1 text-decoration-none d-flex justify-content-between">
+                                    <div>
+                                        <span>{{ pig.pig_id }}</span>
+                                        <p class="m-0 p-0">Status: {{ pig.remarks }}</p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <button class="dropdown_dots" data-user-type="{{ user.user_type }}" style="border: none; background: none;">
+                                            <img src="{% static 'img/three_dots.png' %}" style="height: 24px" alt="...">
+                                        </button>
+                                        <div class="dropdown" style="display: none;">
+                                            {% csrf_token %}
+                                            <button class="icon-button vaccine_table_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}" onclick="openVaccineOverlay('{{ pig.pig_id }}')">
+                                                <img src="{% static 'img/vaccine_button.png' %}" style="height: 20px;" alt="View Vaccines">
+                                            </button>    
+                                            <button class="icon-button edit_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}">
+                                                <img src="{% static 'img/edit_icon.png' %}" style="height: 24px" alt="Edit Pig">
+                                            </button>
+                                            <button class="icon-button-add-pigs delete_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}"  style="display:none;">
+                                                <img src="{% static 'img/trash_can.png' %}" style="height: 24px" alt="...">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <!-- Add more list items as needed for other pig data -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="bg-primary card d-flex" style="max-height: 620px; min-height: 620px; background-color: #127BBE; width: 106%;">
+                    <div class="d-flex justify-content-between">
+                        <div class="mx-2 mt-1">
+                            <span class="text-white p-0 fw-bold"><img src="{% static 'img/pig.png' %}" style="height: 50px;" alt="...">Nursery</span>
+                        </div>
+                        <div class="m-3">
+                            <!-- Display the count from pig_list_28_to_88_days -->
+                            <span class="text-white p-0 fw-bold">{{ pig_list_28_to_88_days.count }}</span>
+                        </div>
+                    </div>
+                    <div style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none; background-color: #55D0F7; max-height: 564px; min-height: 564px;">
+                        <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+                            <!-- Content for Nursery -->
+                            {% for pig in pig_list_28_to_88_days %}
+                                <div class="bg-light border border-dark py-2 px-1 mt-1 text-decoration-none d-flex justify-content-between">
+                                    <div>
+                                        <span>{{ pig.pig_id }}</span>
+                                        <p class="m-0 p-0">Status: {{ pig.remarks }}</p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <button class="dropdown_dots" data-user-type="{{ user.user_type }}" style="border: none; background: none;">
+                                            <img src="{% static 'img/three_dots.png' %}" style="height: 24px;" alt="...">
+                                        </button>
+                                        <div class="dropdown" style="display: none;">
+                                            {% csrf_token %}
+                                            <button class="icon-button vaccine_table_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}" onclick="openVaccineOverlay('{{ pig.pig_id }}')">
+                                                <img src="{% static 'img/vaccine_button.png' %}" style="height: 20px;" alt="View Vaccines">
+                                            </button>    
+                                            <button class="icon-button edit_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}">
+                                                <img src="{% static 'img/edit_icon.png' %}" style="height: 24px;" alt="Edit Pig">
+                                            </button>
+                                            <button class="icon-button-add-pigs delete_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}"  style="display:none;">
+                                                <img src="{% static 'img/trash_can.png' %}" style="height: 24px;" alt="...">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <!-- Add more list items as needed for other pig data -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card d-flex" style="max-height: 620px; min-height: 620px; background-color: #127BBE; width: 106%;">
+                    <div class="d-flex justify-content-between">
+                        <div class="mx-2 mt-1">
+                            <span class="text-white p-0 fw-bold"><img src="{% static 'img/pig.png' %}" style="height: 50px;" alt="...">Suckling</span>
+                        </div>
+                        <div class="m-3">
+                            <!-- Display the count from pig_list_28_days -->
+                            <span class="text-white p-0 fw-bold">{{ pig_list_28_days.count }}</span>
+                        </div>
+                    </div>
+                    <div style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none; background-color: #55D0F7; max-height: 564px; min-height: 564px;">
+                        <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+                            <!-- Content for Suckling -->
+                            {% for pig in pig_list_28_days %}
+                                <div class="bg-light border border-dark py-2 px-1 mt-1 text-decoration-none d-flex justify-content-between">
+                                    <div>
+                                        <span>{{ pig.pig_id }}</span>
+                                        <p class="m-0 p-0">Status: {{ pig.remarks }}</p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <button class="dropdown_dots" data-user-type="{{ user.user_type }}" style="border: none; background: none;">
+                                            <img src="{% static 'img/three_dots.png' %}" style="height: 24px" alt="...">
+                                        </button>
+                                        <div class="dropdown" style="display: none;">
+                                            {% csrf_token %}
+                                            <button class="icon-button vaccine_table_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}" onclick="openVaccineOverlay('{{ pig.pig_id }}')">
+                                                <img src="{% static 'img/vaccine_button.png' %}" style="height: 20px;" alt="View Vaccines">
+                                            </button>    
+                                            <button class="icon-button edit_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}">
+                                                <img src="{% static 'img/edit_icon.png' %}" style="height: 24px" alt="Edit Pig">
+                                            </button>
+                                            <button class="icon-button-add-pigs delete_pigs_button" data-pig-id="{{ pig.id }}" data-user-type="{{ user_type }}" style="display:none;">
+                                                <img src="{% static 'img/trash_can.png' %}" style="height: 24px" alt="...">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <!-- Add more list items as needed for other pig data -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Updated HTML for the pig edit overlay -->
+<div id="edit_pig_overlay">
+    <div class="edit-pig-container rounded" style="width: 50%;">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                EDIT PIG DETAIL
+            </span>
+        </div>
+        <form class="mt-3" id="edit_pig_form">
+            <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                <!-- Editable fields for pig data -->
+                <div class="form-group">
+                    <label for="edit_pig_id" class="me-3">Pig ID:</label>
+                    <input type="text" id="edit_pig_id" name="edit_pig_id" required>
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_dam" class="me-3">Dam:</label>
+                    <input type="text" id="edit_dam" name="edit_dam">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_dob" class="me-3">Date of Birth:</label>
+                    <input type="date" id="edit_dob" name="edit_dob" style="width: 185px;">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sire" class="me-3">Sire:</label>
+                    <input type="text" id="edit_sire" name="edit_sire">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_pig_class" class="me-3">Pig Class:</label>
+                    <input type="text" id="edit_pig_class" name="edit_pig_class">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sex" class="me-3">Sex:</label>
+                    <select id="edit_sex" name="edit_sex" style="width: 185px;">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_count" class="me-3">Count:</label>
+                    <input type="number" id="edit_count" name="edit_count">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_weight" class="me-3">Weight(KG):</label>
+                    <input type="number" id="edit_weight" name="edit_weight" step="0.01">
+                </div><br>
+                
+                <div class="form-group ms-5">
+                    <label for="edit_barcode" class=" ms-5 me-3">Barcode:</label>
+                    <img id="edit_barcode" src="" alt="Barcode Image" style="width: 40%;">
+                    <button id="print-button">Print</button>
+                </div><br>
+            </div>
+            <div class="form-group d-flex flex-row align-items-end ms-2" style="width: 90%;">
+                <label for="edit_remarks" class="ms-5 me-3">Remarks:</label>
+                <textarea id="edit_remarks" name="edit_remarks" cols="60" style="vertical-align: bottom;"></textarea>
+            </div><br>
+            <!-- Add more editable fields as needed -->
+            <div class="d-flex flex-column align-items-end" style="width: 95%;">
+                <div class="form-group d-flex justify-content-end">
+                    <button type="submit" class="save-pig-button shadow custom_button" data-user-type="{{ user_type }}" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">Save</button>
+                    <button class="cancel-button shadow custom_button" style="border-radius: 20px; width: 120px;">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="overlay">
+    <div id="formContainer" class="card rounded">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                ADD PIGS
+            </span>
+        </div>
+        <div class="scheduling-container">
+            <form method="post" action="{% url 'Add_Pigs' user_type=user_type %}">
+                {% csrf_token %}
+                <div class="row mb-3 align-items-center">
+                    <label for="pigID" class="col-md-2 col-form-label">Pig ID:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="pigID" name="pigID" required>
+                    </div>
+                    <label for="dam" class="col-md-2 col-form-label">DAM:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="dam" name="dam" required>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="dob" class="col-md-2 col-form-label">DOB:</label>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control mb-2" id="dob" name="dob" required>
+                    </div>
+                    <label for="sire" class="col-md-2 col-form-label">SIRE:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="sire" name="sire" required>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="class" class="col-md-2 col-form-label">Class:</label>
+                    <div class="col-md-4">
+                        <select class="form-control mb-2" id="class" name="class">
+                            <option value="Suckling">Suckling</option>
+                            <option value="Weanlings">Weanlings</option>
+                            <option value="Grower">Grower</option>
+                            <option value="Pattener">Pattener</option>
+                        </select>
+                    </div>
+                    <label for="sex" class="col-md-2 col-form-label">Sex:</label>
+                    <div class="col-md-4">
+                        <select class="form-control mb-2" id="sex" name="sex">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="count" class="col-md-2 col-form-label">Count:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="count" name="count" required>
+                    </div>
+                    <label for="weight" class="col-md-2 col-form-label">Weight(KG):</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="weight" name="weight" required>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="remarks" class="col-md-2 col-form-label">Remarks:</label>
+                    <div class="col-md-10">
+                        <textarea class="form-control" id="remarks" name="remarks"></textarea>
+                    </div>
+                </div>
+                
+                <hr class="separator">
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="verifBy" class="col-md-2 col-form-label">Verified By:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="verifBy" name="verifBy" required>
+                    </div>
+                    <label for="date" class="col-md-2 col-form-label">Date:</label>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control mb-2" id="date" name="date">
+                    </div>
+                </div>
+    
+                <div class="d-flex justify-content-end">
+                    <input class="shadow custom_button" type="submit" value="Save Pig" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                    <input class="shadow custom_button" type="button" id="closeOverlayButton" value="Cancel" style="border-radius: 20px; width: 120px;">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="overlay1">
+    <div id="SowformContainer" class="card rounded">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                ADD SOW
+            </span>
+        </div>
+        <div class="scheduling-container">
+            <form method="post" action="{% url 'add_sow'  user_type=user_type  %}">
+                {% csrf_token %}
+                <div class="row mb-3 align-items-center">
+                    <label for="pigID" class="col-md-2 col-form-label">Pig ID:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="Sow_pigID" name="pig_id" required>
+                    </div>
+                    <label for="dam" class="col-md-2 col-form-label">DAM:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="Sow_dam" name="dam">
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="dob" class="col-md-2 col-form-label">DOB:</label>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control mb-2" id="Sow_dob" name="dob">
+                    </div>
+                    <label for="sire" class="col-md-2 col-form-label">SIRE:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="Sow_sire" name="sire">
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="class" class="col-md-2 col-form-label">Class:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="Sow_class" name="pig_class" value="Sow">
+                    </div>
+                    <label for="sex" class="col-md-2 col-form-label">Sex:</label>
+                    <div class="col-md-4">
+                        <select class="form-control mb-2" id="sex" name="sex">
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="count" class="col-md-2 col-form-label">Count:</label>
+                    <div class="col-md-4">
+                        <input type="number" class="form-control mb-2" id="Sow_count" name="count">
+                    </div>
+                    <label for="weight" class="col-md-2 col-form-label">Weight(KG):</label>
+                    <div class="col-md-4">
+                        <input type="number" class="form-control mb-2" id="Sow_weight" name="weight">
+                    </div>
+                </div>
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="remarks" class="col-md-2 col-form-label">Remarks:</label>
+                    <div class="col-md-10">
+                        <textarea class="form-control" id="Sow_remarks" name="remarks"></textarea>
+                    </div>
+                </div>
+                
+                <hr class="separator">
+                
+                <div class="row mb-3 align-items-center">
+                    <label for="verifBy" class="col-md-2 col-form-label">Verified By:</label>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control mb-2" id="Sow_verifBy" name="verif_by">
+                    </div>
+                    <label for="date" class="col-md-2 col-form-label">Date:</label>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control mb-2" id="Sow_date" name="date">
+                    </div>
+                </div>
+    
+                <div class="d-flex justify-content-end">
+                    <input class="shadow custom_button" type="submit" value="Save Sow" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                    <input class="shadow custom_button" type="button" id="closeOverlayButton1" value="Cancel" style="border-radius: 20px; width: 120px;">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="edit_sow_overlay" class="edit-sow-overlay">
+    <div class="edit-sow-container rounded" style="width: 40%;">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                EDIT SOW DATA
+            </span>
+        </div>
+        <form id="edit_sow_form" method="post" class="mt-2">
+            {% csrf_token %}
+            <div class="d-flex flex-column align-items-end" style="width: 60%;">
+                <div class="form-group">
+                    <label for="edit_sow_id">Sow ID:</label>
+                    <input type="text" id="edit_sow_id" name="edit_sow_id" required value="{{ edit_sow_id }}">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_dam">Dam:</label>
+                    <input type="text" id="edit_sow_dam" name="edit_sow_dam">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_dob">Date of Birth:</label>
+                    <input type="date" id="edit_sow_dob" name="edit_sow_dob" style="width: 185px;">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_sire">Sire:</label>
+                    <input type="text" id="edit_sow_sire" name="edit_sow_sire">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_pig_class">Pig Class:</label>
+                    <input type="text" id="edit_sow_pig_class" name="edit_sow_pig_class">
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_sex">Sex:</label>
+                    <select id="edit_sow_sex" name="edit_sow_sex" style="width: 185px;">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div><br>
+                <div class="form-group">
+                    <label for="edit_sow_count">Count:</label>
+                    <input type="number" id="edit_sow_count" name="edit_sow_count">
+                </div><br>
+                <div class="form-group">    
+                    <label for="edit_sow_weight">Weight:</label>
+                    <input type="number" id="edit_sow_weight" name="edit_sow_weight" step="0.01">
+                </div>
+                <!-- Add more editable fields as needed -->
+            </div>
+            <div class="form-group d-flex flex-row align-items-end ms-2">
+                <label for="edit_sow_remarks" class="ms-5 me-1 align-items-start">Remarks:</label>
+                <textarea class="mt-2" id="edit_sow_remarks" name="edit_sow_remarks" cols="60" style="vertical-align: top;"></textarea>
+            </div><br>
+            <div class="d-flex justify-content-end" style="width: 95%;">
+                <button type="submit" class="save-sow-button" data-user-type="{{ user_type }}" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF; border: none;">Save</button>
+                <button id="cancel-sow-button" class="cancel-button" style="border-radius: 20px; width: 120px; border: none;">Cancel</button>
+            </div><br>
+        </form>
+    </div>
+</div>  
+
+<div id="sow_perf_overlay" class="sow_perf_overlay">
+    <div class="edit-pig-container rounded" style="width: 20%;">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 10%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                SOW PERFORMANCE
+            </span>
+        </div>
+        <div class="sow-performance-data" id="sow_performance_data" style="height: 20%">
+            {{ sow_perf_data.sow_no }}
+            <canvas id="myPieChart" width="400" height="400"></canvas>
+            <canvas id="myLineChart" width="400" height="400"></canvas>
+        </div>
+        <div class="d-flex justify-content-end">
+            <input class="shadow custom_button" type="button" id="closeButton" value="Close" style="border-radius: 20px; width: 120px; transform: translateY(-15%);">
+        </div>
+    </div>
+</div>
+
+<div id="vaccine-overlay" class="vaccine-overlay">
+    <div class="edit-pig-container rounded m-5" style="width: 40%; height: 70%; overflow: scroll;">
+        <div class="rounded-top" style="background-color: #ff7b7b; height: auto;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                PIG VACCINE RECORD
+            </span>
+        </div>
+        <div class="d-flex flex-column justify-content-between" style="height: 92%">
+            <div id="vaccine-info" class="m-2">
+                <!-- Fields to display vaccine data will be added here using JavaScript -->
+            </div>
+            <div class="d-flex flex-row-reverse" style="width: 100%;">
+                <input class="close-button shadow custom_button" type="button" onclick="closeVaccineOverlay()"  value="Close" style="border-radius: 20px; width: 120px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

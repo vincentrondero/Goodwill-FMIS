@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div id="pig_sales_monthly_data" style="display: none;">{{ pig_sales_monthly_data|safe }}</div>
+<div class="col py-3 custom-padX gap-5" style="height: 15rem;">
+  <div class="row py-3 gap-4">
+      <div class="card px-2" style="width: 23rem; background-color:#BC4749;">
+        <div class="col col-auto card-body card-font d-flex justify-content-between">
+            <div>
+                <img src="{% static 'img/pig_logo.png' %}" style="height: 120px;" alt="...">
+                <p class="px-1 fs-3 text-white"> Pigs </p>
+            </div>
+            <div class="py-3 my-3">
+                <span class="text-white p-0 fw-bold" style="font-size:500%">
+                    <span class="larger-text">{{ pig_list_more_88_days.count }}</span>/<span class="smaller-text"  style="font-size: 50%; color:#D9D9D9;" >{{ all_pigs }}</span>
+                </span>
+                
+            </div>
+        </div>
+      </div>
+      <div class="card px-2" style="width: 23rem; background-color:#F75555;">
+        <div class="col col-auto card-body card-font d-flex justify-content-between">
+            <div>
+                <img src="{% static 'img/piglets.png' %}" style="height: 120px;" alt="...">
+                <p class="px-1 fs-3 text-white"> Piglets </p>
+            </div>  
+            <div class="py-3 my-3">
+                <span class="text-white p-0 fw-bold" style="font-size:500%">
+                    <span class="larger-text">{{ pig_list_88_days.count }}</span>/<span class="smaller-text" style="font-size: 50%; color:#D9D9D9;">{{ all_pigs }}</span>
+                </span>                
+            </div>
+        </div>
+      </div>
+      <div class="card px-2" style="width: 23rem; background-color:#F8B9B9;">
+        <div class="col col-auto card-body card-font d-flex justify-content-between">
+            <div>
+                <img src="{% static 'img/feeds_logo.png' %}" style="height: 120px;" alt="...">
+                <p class="px-1 fs-3 text-white"> Feed Stock </p>
+            </div>  
+            <div class="py-3 my-3">
+                <span class="text-white p-0 fw-bold" style="font-size:500%">{{ remaining_feed_quantity }}</span>
+            </div>
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="card px-2 custom_sched_box" id="scheduleToday">
+          <div class="mt-2 schedule_header">SCHEDULE TODAY:</div>
+          {% if today_tasks %}
+              {% for task in today_tasks %}
+                  <div class="mt-2 p-2 custom_sched_tab">
+                      {{ task.task_name }}
+                      <label class="checkbox-container">
+                          <input
+                              type="checkbox"
+                              data-task-id="{{ task.id }}"
+                              {% if task.is_done %}checked{% endif %}
+                              onchange="updateTaskStatus(this)"
+                          >
+                          <span class="checkmark"></span>
+                      </label>
+                  </div>
+              {% endfor %}
+          {% else %}
+            <img src="{% static 'img/No_Task.png' %}" alt="No Tasks Today Image" class="no-task-img">
+            <p class="no-tasks-text">No Tasks Today.</p>
+          {% endif %}
+        </div>
+
+        <button class="Feeds_Update_Button mt-2" id="openOverlayButton">
+          <span class="pb-3 text-white fs-5 fw-bold">
+              Daily Feeds Inventory Update
+          </span>
+        </button>
+      </div>
+      <div style="height:100%; width: 20%; transform: translateY(160%);">
+        <select class="mt-2 ms-2 rounded" id="selectPigSalesYear"></select>
+        <canvas class="ms-2" id="pigMonthlySalesChart" width="600" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="overlay">
+    <div id="formContainer" class="card rounded">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                Update Inventory
+            </span>
+        </div>
+        <div class="scheduling-container">
+            <form method="post" action="{% url 'add_feed_stock_update' user_type=user_type %}">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="ration">Ration:</label>
+                    <select class="form-control" id="ration" name="ration"  style="padding:0; padding-left:1%;">
+                        <option value="" disabled selected>Select a Ration</option>
+                        <option value="Booster">Booster</option>
+                        <option value="Starter">Starter</option>
+                        <option value="Pre-starter">Pre-starter</option>
+                        <option value="Grower">Grower</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="count_update">Number of Sack Utilize Today:</label>
+                    <input type="text" class="form-control" id="count_update" name="count_update">
+                </div>
+            
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" class="form-control" id="date" name="date">
+                </div>
+            
+                <div class="form-group">
+                    <label for="verify_by">Verify By:</label>
+                    <input type="text" class="form-control" id="verify_by" name="verify_by">
+                </div>
+    
+            
+                <div class="d-flex justify-content-end mt-3">
+                    <input class="shadow custom_button" type="submit" value="Save Task" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                    <input class="shadow custom_button" type="button" id="closeOverlayButton" value="Cancel" style="border-radius: 20px; width: 120px;">
+                </div>
+            </form>
+            <div class="error-message" id="error-message">
+                {{ message }}
+            </div>            
+        </div>        
+    </div>
+</div>
+<div id="calendar" class="mt-4"></div>
+
+{% endblock %}

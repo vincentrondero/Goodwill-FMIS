@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="navbar my-1 d-flex flex-row justify-content-between">
+    <button class="custom_button" id="openOverlayButton" style="border-radius: 20px; width: 120px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;" >ADD USERS</button>
+</div>
+
+<div id="overlay">
+    <div id="formContainer" class="rounded" style="width: 40%;">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/feeds_logo.png' %}" style="height: 30px;" alt="...">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                ADD USER
+            </span>
+        </div>
+        <div class="scheduling-container">
+            <form method="post" action="{% url 'manage_user'  user_type=user_type %}">
+                {% csrf_token %}
+                <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                    <div>
+                        <label for="firstname" class="LFirstName">Firstname:</label>
+                        <input type="text" class="InFirstName" id="firstname" name="firstname" value="Juan"><br><br>
+                    </div>
+                    <div>
+                        <label for="lastname" class="LLastName">Lastname:</label>
+                        <input type="text" class="InLastName" id="lastname" name="lastname" value="De la Cruz"><br><br>
+                    </div>                    
+                    <div>
+                        <label for="role" class="LRole">Role:</label>
+                        <input type="text" class="InRole" id="role" name="role" value="user"><br><br>
+                    </div>                    
+                    <div>
+                        <label for="username" class="LUserName">Username:</label>
+                        <input type="text" class="InUserName" id="username" name="username"><br><br>
+                    </div>                       
+                    <div>
+                        <label for="password" class="LPassword">Password:</label>
+                        <input type="password" class="InPassword" id="password" name="password"><br><br>
+                    </div>
+                    <div>
+                        <label for="confpass" class="LConfPass">Confirm Password:</label>
+                        <input type="password" class="InConfPass" id="confpass" name="confpass"><br><br>
+                    </div>                    
+                </div>
+                    
+                    <hr class="separator">
+                <div class="d-flex flex-column align-items-end" style="width: 40%;">
+                    <div class="Submission">
+                        <label for="date" class="LDate">Date:</label>
+                        <input type="date" class="Indate" id="date" name="date" value="{{ date.today }}"><br><br>
+                    </div>
+                </div>   
+
+                <div class="d-flex justify-content-end">
+                    <input class="shadow  custom_button" type="submit" value="Save Task" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                    <input class="shadow custom_button" type="button" id="closeOverlayButton" value="Cancel" style="border-radius: 20px; width: 120px;">
+                </div>
+            </form>
+            <div class="error-message" id="error-message">
+                {{ message }}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col" style="height: 16rem;">
+    <div class="row gap-4" style="display: flex;">
+        <div style="width: 22rem; margin-left: 1%; background-color: #F7D355;">
+            <div class="card-body card-font">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <img src="{% static 'img/user_profile.png' %}" style="height: 120px;" alt="...">
+                    </div>
+                    <div>
+                        <span class="text-white p-0 fw-bold" style="font-size:500%">
+                            <span class="larger-text" data-content="{{ users_count  }}">{{ users_count  }}</span>/<span class="smaller-text" data-content="{{ all_user }}" style="font-size: 50%; color:grey;">{{ all_user }}</span>
+                        </span>  
+                    </div>
+                </div>
+                <p class="px-3" style="text-align:left; color: #FFFF; font-size: 24px;"> Active Users</p>
+            </div>
+        </div>
+        <div style="width: 22rem; margin-left: 1%; background-color: #FDE387;">
+            <div class="card-body card-font">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <img src="{% static 'img/archive_logo.png' %}" style="height: 120px;" alt="...">
+                    </div>
+                    <div>
+                        <span class="text-white p-0 fw-bold" style="font-size:500%">
+                            <span class="larger-text" data-content="{{ users__in_archive_count }}">{{ users__in_archive_count }}</span>
+                        </span>                        
+                    </div>
+                </div>
+                <p class="px-3" style="text-align:left; color: #FFFF; font-size: 24px;"> Archive Users</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div>Active User</div>
+<div class="row py-3">
+    <table style="border-collapse: collapse; margin-left: 1%; width: 98%;">
+        <tr class="table_header" style="background-color: #FF7373; color: white;">
+            <th>Name</th>
+            <th>Name</th>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>Date Added</th>
+            <th>Action</th>
+        </tr>
+        {% for user in users %}
+        <tr class="table_content" style="background-color:#FDF0F0">
+            <td style="padding-left: 10px;">{{ user.firstname }}</td>
+            <td style="padding-left: 10px;">{{ user.lastname }}</td>
+            <td style="padding-left: 10px;">{{ user.username }}</td>
+            <td style="padding-left: 10px;">{{ user.role }}</td>
+            <td style="padding-left: 10px;">{{ user.date }}</td>
+            <td>
+                {% csrf_token %}
+                <button class="icon-button edit_button" data-user-id="{{ user.pk }}">
+                    <img src="{% static 'img/edit_icon.png' %}" style="height: 24px;" alt="...">
+                </button>
+                <button class="icon-button archive_user" data-user-id="{{ user.pk }}">
+                    <img src="{% static 'img/archive_icon.png' %}" style="height: 24px;" alt="...">
+                </button>
+                <button class="icon-button delete_button" data-user-id="{{ user.id }}" data-user-type="{{ user_type }}" style="display:none;">
+                    <img src="{% static 'img/trash_can.png' %}" style="height: 24px;" alt="...">
+                </button>              
+            </td>                    
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div>Archive User</div>
+<div class="row py-3">
+    <table style="border-collapse: collapse; margin-left: 1%; width: 98%;">
+        <tr class="table_header" style="background-color: #FF7373; color: white;">
+            <th>Name</th>
+            <th>Name</th>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>Date Added</th>
+            <th>Action</th>
+        </tr>
+        {% for user in users_in_archive %}
+        <tr class="table_content" style="background-color:#FDF0F0">
+            <td style="padding-left: 10px;">{{ user.firstname }}</td>
+            <td style="padding-left: 10px;">{{ user.lastname }}</td>
+            <td style="padding-left: 10px;">{{ user.username }}</td>
+            <td style="padding-left: 10px;">{{ user.role }}</td>
+            <td style="padding-left: 10px;">{{ user.date }}</td>
+            <td>
+                {% csrf_token %}
+                <button class="icon-button edit_button" data-user-id="{{ user.pk }}">
+                    <img src="{% static 'img/edit_icon.png' %}" style="height: 24px;" alt="...">
+                </button>
+                <button class="icon-button archive_user" data-user-id="{{ user.pk }}" style="display:none;">
+                    <img src="{% static 'img/archive_icon.png' %}" style="height: 24px;" alt="...">
+                </button>
+                <button class="icon-button delete_button" data-user-id="{{ user.id }}" data-user-type="{{ user_type }}" style="display:none;">
+                    <img src="{% static 'img/trash_can.png' %}" style="height: 24px;" alt="...">
+                </button>              
+            </td>                    
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div id="edit_overlay" style="display: none;">
+    <div id="editFormContainer" class="card rounded" style="width: 30%;">
+        <div class="rounded-top" style="background-color: #ff7b7b;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                EDIT USER
+            </span>
+        </div>
+    <div class="scheduling-container">
+        <form id="editUserForm"> 
+            {% csrf_token %}
+            <!-- Add input fields for editing user details -->
+            <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                <div>
+                    <label for="firstname" class="LFirstName">Firstname:</label>
+                    <input type="text" name="firstname" id="edit_firstname" value="">
+                </div>
+                <br>
+                <div>
+                    <label for="lastname" class="LLastName">Lastname:</label>
+                    <input type="text" name="lastname" id="edit_lastname" value="">
+                </div>
+                <br>
+                <div>
+                    <label for="username" class="LUserName">Username:</label>
+                    <input type="text" name="username" id="edit_username" value="">
+                </div>
+                <br>
+                <div>
+                    <label for="role" class="LRole">Role:</label>
+                    <input type="text" name="role" id="edit_role" value=""   readonly>
+                </div>
+                <br>
+                <div>
+                    <label for="date" class="LDate">Date:</label>
+                    <input type="text" name="date" id="edit_date" value="{{ date.today }}">
+                </div>
+                <br>
+            </div>
+            <!-- <button  class="save-button" data-user-type="{{ user_type }}">Save</button>
+            <button class="cancel-button" id=closeOverlayButton>Cancel</button> -->
+            <div class="d-flex justify-content-end">
+                <input class="shadow save-button custom_button" data-user-type="{{ user_type }}" type="submit" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
+                <input class="shadow custom_button cancel-button" type="button" id="cancel-button" value="Cancel" style="border-radius: 20px; width: 120px;">
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+
+<div class="archive-overlay" id="archive-overlay">
+    <div class="archive-popup">
+        <p>Are you sure you want to archive this user?</p>
+        <div class="archive-buttons">
+            <button id="confirm-archive" class="shadow save-button custom_button" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">OK</button>
+            <button id="cancel-archive" class="shadow custom_button cancel-button" style="border-radius: 20px; width: 120px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
