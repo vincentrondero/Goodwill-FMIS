@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import django_heroku
-from decouple import config
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -82,16 +81,21 @@ DATABASES = {}
 # Check if the app is running on Heroku (Heroku sets the 'DYNO' environment variable).
 if 'DYNO' in os.environ:
     # Heroku database configuration
-    DATABASES['default'] = dj_database_url.config(default=config('postgres://irlbsmurpsdztm:e4b990cd29c5add0ef3b0e189757bc7337466d7cc5c052e19482aca12bc055b6@ec2-54-234-13-16.compute-1.amazonaws.com:5432/depv9b4v3pm87'))
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
 else:
     # Local development database configuration
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Pigs',
-        'USER': 'postgres',
-        'PASSWORD': 'milotic03',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ.get('DB_NAME', 'Pigs'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'milotic03'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
 
 
