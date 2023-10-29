@@ -261,7 +261,7 @@ def reports(request, user_type):
     vaccinated_pigs = Pig.objects.annotate(vaccine_count=Count('vaccines')).filter(vaccine_count__gt=0).count()
 
     # Calculate the percentage of vaccinated pigs
-    total_pigs = len(pig_data)
+    total_pigs = len(pig_data.exclude(exclude_q))
     percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
     vaccine_counts = Vaccine.objects.values('vaccine').annotate(count=Count('pig_id', distinct=True))
     all_vaccine_options = ["MH", "HPS", "PRRS", "PCV", "HCV1", "SIV", "APP", "HCV2", "PRV"]
