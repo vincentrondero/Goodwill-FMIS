@@ -35,4 +35,10 @@ urlpatterns = [
     path('get_sow_performance_data/<int:pig_id>/', views.get_sow_performance_data, name='get_sow_performance_data'),
     path('archive_user/<int:user_id>/', views.archive_user, name='archive_user'),
     path('get_vaccine_data/<str:pig_id>/', views.get_vaccine_data, name='get_vaccine_data'),
+    path('generate_sales_report/', views.generate_sales_report, name='generate_sales_report'),
+    path('generate_mortality_report/', views.generate_mortality_report, name='generate_mortality_report'),
+    path('generate_vaxx_report/', views.generate_vaxx_report, name='generate_vaxx_report'),
+    path('generate_weanling_report/', views.generate_weanling_report, name='generate_weanling_report'),
+    path('generate_feed_report/', views.generate_feed_report, name='generate_feed_report'),
+    # path('feed_stocks_report/', views.feed_stocks_report, name='feed_stocks_report'),
 ]
