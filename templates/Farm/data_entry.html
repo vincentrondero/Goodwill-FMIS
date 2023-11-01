@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="row px-3 py-3 gap-1 ps-5">
-    <div class="col-5">
+<div class="row px-3 py-3 ms-5 gap-1 ps-5 mt-3">
+    <div class="col-5 me-5">
         <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton1">
             <img src="{% static 'img/pig_logo.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
@@ -20,8 +20,8 @@
     </div>
 </div>
 
-<div class="row px-3 py-3 gap-1 ps-5">
-    <div class="col-5">
+<div class="row px-3 py-3 ms-5 gap-1 ps-5">
+    <div class="col-5 me-5">
         <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton3">
             <img src="{% static 'img/piglets.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
@@ -39,8 +39,8 @@
     </div>
 </div>
 
-<div class="row px-3 py-3 gap-1 ps-5">
-    <div class="col-5">
+<div class="row px-3 py-3 ms-5 gap-1 ps-5">
+    <div class="col-5 me-5">
         <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton5">
             <img src="{% static 'img/feeds_logo.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
@@ -59,9 +59,9 @@
 </div>
 
 <div id="overlay1">
-    <div id="formContainer" class="card rounded">
+    <div id="formContainer" class="card rounded" style="width: 40%;">
         <div class="rounded-top" style="background-color: #ff7b7b;">
-            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+            <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
             <span class="mx-3 pt-2 fs-5 text-white fw-bold">
                 PIG SALES
             </span>
@@ -69,7 +69,7 @@
         <div class="scheduling-container">
             <form method="POST" action="{% url 'save_pig_sale' user_type=user_type %}">
                 {% csrf_token %}   
-                <div class="col g-3">
+                <div class="col g-3" style="transform: translateX(15%);">
                     <div class="col-md-6">
                         <label for="PigID" class="form-label">Pig ID:</label>
                         <select class="form-select" id="pigID" name="PigID">
@@ -91,6 +91,7 @@
                     </div>
                 </div>
                 <hr class="separator">
+                <div style="transform: translateX(15%);">
                     <div class="col-md-6">
                         <div class="Verification">
                             <label for="Verified" class="form-label">Verified By:</label>
@@ -101,7 +102,8 @@
                         <label for="date" class="form-label">Date:</label>
                         <input type="date" class="form-control" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}">
                     </div>
-                <div class="d-flex justify-content-end">
+                </div>
+                <div class="d-flex justify-content-end mt-4">
                     <input class="shadow  custom_button" type="submit" value="Save" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
                     <input class="shadow custom_button" type="button" id="closeOverlayButton1" value="Cancel" style="border-radius: 20px; width: 120px;">
                 </div>
@@ -298,9 +300,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-4 mt-4" style="transform: translateY(10%);">
+                    <div class="col-4 mt-3" style="transform: translateY(10%);">
                         <label for="date" class= "LDate">Date:</label>
-                        <input type="date" class= "InDate" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br><br>
+                        <input type="date" class= "InDate" style="width: 200px; height: 38px;" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br><br>
                     </div>
                 </div>
 
@@ -371,11 +373,9 @@
                     </div>
                     <div class="col" style="transform: translateY(32%);">
                         <label for="date" class= "LDate">Date:</label>
-                        <input type="date" class= "InDate" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br>
+                        <input type="date" class="InDate" style="width: 200px; height: 35px;" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br>
                     </div>
                 </div>
-                
-
                 <hr class="separator">
     
                     <div class="form-group">
@@ -428,14 +428,14 @@
         <div class="scheduling-container">
             <form method="POST" action="{% url 'save_feeds_inventory' user_type=user_type %}">
                 {% csrf_token %}   
-                <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                <div class="d-flex flex-column align-items-end" style="width: 60%;">
                     <div>
                         <label for="feedsB" class= "LFeedsB">Feeds Brand:</label>
                         <input type="text" class= "InFeedsB" id="feedsB" name="feedsB"><br><br>
                     </div>
                     <div>
                         <label for="feedsR" class="LFeedsR">Feeds Ration:</label>
-                        <select class="InFeedsR" id="feedsR" name="feedsR">
+                        <select class="InFeedsR" id="feedsR" name="feedsR" style="width: 189px; height: 31px;">
                             <option value="Booster">Booster</option>
                             <option value="Starter">Starter</option>
                             <option value="Pre-Starter">Pre-Starter</option>
@@ -443,7 +443,7 @@
                             <option value="Lactating">Lactating</option>
                             <option value="Breeder">Breeder</option>
                         </select>
-                    </div>                    
+                    </div><br>                  
                     <div>
                         <label for="cost" class= "LCost">Cost:</label>
                         <input type="text" class= "InCost" id="cost" name="cost"><br><br>
@@ -456,14 +456,14 @@
                 
                 <hr class="separator">
     
-                <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                <div class="d-flex flex-column align-items-end" style="width: 60%;">
                     <div>
                         <label for="verifBy" class= "LVerifBy">Verified By:</label>
                         <input type="text" class= "InVerifBy" id="verifBy" name="verifBy"><br><br>
                     </div>
                     <div>
-                        <label for="date" class= "LDate">Date:</label>
-                        <input type="date" class= "InDate" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br><br>
+                        <label for="date" class="LDate me-1">Date:</label>
+                        <input type="date" class="InDate" style="width: 189px;" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br><br>
                     </div>
                 </div>
     
@@ -504,17 +504,17 @@
                     </div>
                     <div class="col" style="transform: translateY(35%);">
                         <label for="date" class="LDate">Date:</label>
-                        <input type="date" class="InDate" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br>
+                        <input type="date" class="InDate" style="width: 189px; height: 31px;" id="date" name="date" value="{{ date.today|date:'Y-m-d' }}"><br>
                     </div>
                 </div>
-                <div class="d-flex flex-column align-items-end" style="width: 40%;">
+                <div class="d-flex flex-column align-items-end" style="width: 50%;">
                     <div>
                         <label for="class" class="LClass">Class:</label>
                         <input type="text" class="InClass" id="class" name="class"><br><br>
-                    </div>
-                    <div>
-                        <label for="cause" class="LCause">Cause:</label>
-                        <select class="form-select" id="cause" name="cause">
+                    </div> 
+                    <div class="mb-3">
+                        <label for="cause" class="LCause">Feeds Ration:</label>
+                        <select class="form-select" id="cause" name="cause" style="width: 189px; height: 35px;">
                             <option value="Heat Stress">Heat Stress</option>
                             <option value="Injuries">Injuries</option>
                             <option value="Congenital Abnormalities">Congenital Abnormalities</option>
@@ -522,7 +522,7 @@
                             <option value="Eating Disorder">Eating Disorder</option>
                             <option value="Other">Other</option>
                         </select>
-                    </div>                    
+                    </div>                  
                     <div>
                         <label for="location" class="LLocation">Location:</label>
                         <input type="text" class="InLocation" id="location" name="location"><br><br>
@@ -533,8 +533,8 @@
                     </div>
                 </div>
                 <hr class="separator">
-                <div class="d-flex flex-column align-items-end" style="width: 40%;">
-                    <div>
+                <div class="d-flex flex-column align-items-end" style="width: 60%;">
+                    <div class="mt-2">
                         <label for="repBY" class="LRepBy">Reported By:</label>
                         <input type="text" class="InRepBy" id="repBy" name="repBy"><br><br>
                     </div>

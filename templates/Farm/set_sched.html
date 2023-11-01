@@ -5,7 +5,7 @@
     <button class="custom_button" id="openOverlayButton" style="border-radius: 20px; width: 120px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;" >Set Schedule</button>
 </div>
 <div id="overlay">
-    <div id="formContainer" class="card rounded">
+    <div id="formContainer" class="card rounded" style="width: 40%;">
         <div class="rounded-top" style="background-color: #ff7b7b;">
             <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
             <span class="mx-3 pt-2 fs-5 text-white fw-bold">
@@ -15,18 +15,24 @@
         <div class="scheduling-container">
             <form method="post" action="{% url 'set_sched' user_type=user_type %}">
                 {% csrf_token %}
-                <label class="taskname" for="taskname">Task Name:</label>
-                <input class="taskname" type="text" id="taskname" name="taskname"><br><br>
-
-                <label class="duedate" for="duedate">Due Date:</label>
-                <input class="duedate" type="date" id="duedate" name="duedate"><br><br>
-
-                <label class="duetime" for="duetime">Due Time:</label>
-                <input class="duetime" type="time" id="duetime" name="duetime"><br><br>
-
-                <label class="desc" for="desc">Description:</label>
-                <input type="text" class="desc" id="desc" name="desc"><br><br>
-                
+                <div class="d-flex flex-column align-items-end" style="width: 50%;">
+                    <div class="mt-1">
+                        <label class="taskname" for="taskname">Task Name:</label>
+                        <input class="taskname" type="text" id="taskname" name="taskname"><br><br>
+                    </div>
+                    <div>
+                        <label class="duedate" for="duedate">Due Date:</label>
+                        <input class="duedate" style="width: 185px;" type="date" id="duedate" name="duedate"><br><br>
+                    </div>
+                    <div>
+                        <label class="duetime" for="duetime">Due Time:</label>
+                        <input class="duetime" type="text" id="duetime" name="duetime"><br><br>
+                    </div>
+                    <div>
+                        <label class="desc" for="desc">Description:</label>
+                        <input type="text" class="desc" id="desc" name="desc"><br><br>
+                    </div>
+                </div>
                 <div class="d-flex justify-content-end">
                     <input class="shadow  custom_button" type="submit" value="Save Task" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
                     <input class="shadow custom_button" type="button" id="closeOverlayButton" value="Cancel" style="border-radius: 20px; width: 120px;">
@@ -37,7 +43,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> <br>
 <div id="calendar"></div>
 <div class="card px-2 custom_sched_box" id="scheduleToday">
     <div class="mt-2 schedule_header">SCHEDULE TODAY:</div>
