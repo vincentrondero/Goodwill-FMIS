@@ -43,6 +43,12 @@
                     Feeds Report
                 </button>
             </form>
+            <form method="post" action="{% url 'feedExpensesReport' %}">
+                {% csrf_token %}
+                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                    Feeds Expenses
+                </button>
+            </form>
             <form method="post" action="{% url 'generate_weanling_report' %}">
                 {% csrf_token %}
                 <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">

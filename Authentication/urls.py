@@ -40,5 +40,5 @@ urlpatterns = [
     path('generate_vaxx_report/', views.generate_vaxx_report, name='generate_vaxx_report'),
     path('generate_weanling_report/', views.generate_weanling_report, name='generate_weanling_report'),
     path('generate_feed_report/', views.generate_feed_report, name='generate_feed_report'),
-    # path('feed_stocks_report/', views.feed_stocks_report, name='feed_stocks_report'),
+    path('feedExpensesReport/', views.feedExpensesReport, name='feedExpensesReport'),
 ]

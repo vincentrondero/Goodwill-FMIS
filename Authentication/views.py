@@ -1693,3 +1693,78 @@ def generate_feed_report(request):
 
     if request.method == 'POST':
         return response
+    
+def feedExpensesReport(request):
+    # Get the current month and year
+    current_month = datetime.now()   
+
+    feeds_expenses = FeedsInventory.objects.filter(date__year=current_month.year, date__month=current_month.month)
+
+    # Create a buffer for the PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    total_expenses = Decimal(0)
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Feeds Expenses for " + current_month.strftime('%Y-%B'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['Ration Type', 'Quantity (sacks)', 'Cost', 'Date']]
+
+    for feedsExp in feeds_expenses:
+        table_data.append([feedsExp.feeds_ration, feedsExp.quantity, feedsExp.cost, feedsExp.date])
+        total_expenses += feedsExp.cost
+
+    totalExpStr = str(total_expenses)
+
+    # Query to aggregate the sum of 'cost' for each unique 'feeds_ration'
+    results = FeedsInventory.objects.values('feeds_ration').filter(date__year=current_month.year, date__month=current_month.month).annotate(total_cost=Sum('cost'))
+
+    # Add results to the list of paragraph elements
+    for result in results:
+        feeds_ration = result['feeds_ration']
+        total_cost = result['total_cost']
+        elements.append(Paragraph(f"{feeds_ration}: {total_cost}", styles))
+
+    elements.append(Paragraph("Total Cost: " + totalExpStr, style=styles))
+
+    # Create a table
+    table = Table(table_data, colWidths=130, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="feedsExpenses_report.pdf")
+
+    if request.method == 'POST':
+        return response
