@@ -367,7 +367,7 @@ def reports(request, user_type):
     difference_booster = (total_quantity_booster - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_booster)) * 25
     difference_starter = (total_quantity_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_starter))* 25
     difference_pre_starter = (total_quantity_pre_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_pre_starter))* 25
-    difference_grower = total_quantity_grower - (sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_grower))* 25
+    difference_grower = (total_quantity_grower - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_grower))* 25
 
     consumption_rate_suckling = 1.5
     consumption_rate_weanlings = 2.5
