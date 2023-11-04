@@ -1930,6 +1930,9 @@ document.addEventListener("DOMContentLoaded", function () {
                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
                                     }]
                                 },
+                                options: {
+                                    responsive: false,
+                                },
                             });
 
                             // Create the line chart
