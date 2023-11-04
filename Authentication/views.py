@@ -317,9 +317,13 @@ def reports(request, user_type):
         vaccine_counts_dict[entry['vaccine']] = entry['count']
 
     for option in all_vaccine_options:
-        vaccinated_pigs_for_need = vaccine_counts_dict.get(option, 0)
-        vaccine_needed[option] = total_pigs_exclude  - vaccinated_pigs_for_need
-
+        vaccinated_pigs_for_option = Vaccine.objects.filter(vaccine=option).count()
+        # Exclude pigs that are sold or dead for the specific vaccine option
+        vaccinated_pigs_for_option_excluding_sold_dead = vaccinated_pigs_for_option - Vaccine.objects.filter(
+            Q(pig__pigsale__isnull=False, vaccine=option) | Q(pig__mortality_forms__isnull=False, vaccine=option)
+        ).count()
+        vaccine_needed[option] = total_pigs_exclude - vaccinated_pigs_for_option_excluding_sold_dead
+        print(vaccine_needed)
     
     # Update counts based on available data
     unvaccinated_counts = {option: total_pigs - count for option, count in vaccine_counts_dict.items()}
@@ -337,7 +341,6 @@ def reports(request, user_type):
     pig_list_88_to_148_days = Pig.objects.filter(dob__gte=one_forty_eight_days_ago, dob__lt=eighty_eight_days_ago).exclude(exclude_q).count() 
     pig_list_greater_than_148_days = Pig.objects.filter(dob__lt=one_forty_eight_days_ago).exclude(exclude_q).count() 
     # Assuming your ration options are "Booster," "Starter," "Pre-Starter," and "Grower"
-# Adjust the filtering based on these ration options
 
     # For Booster
     booster_option = "Booster"
@@ -364,7 +367,7 @@ def reports(request, user_type):
     difference_booster = (total_quantity_booster - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_booster)) * 25
     difference_starter = (total_quantity_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_starter))* 25
     difference_pre_starter = (total_quantity_pre_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_pre_starter))* 25
-    difference_grower = total_quantity_grower - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_grower)* 25
+    difference_grower = total_quantity_grower - (sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_grower))* 25
 
     consumption_rate_suckling = 1.5
     consumption_rate_weanlings = 2.5
@@ -385,10 +388,10 @@ def reports(request, user_type):
 
 
    # Calculate the total_feed_needed_suckling_deficit
-    total_feed_needed_suckling_deficit = max(pig_list_28_days * consumption_rate_suckling * 30 - difference_booster, 0)
+    total_feed_needed_suckling_deficit = max((pig_list_28_days * consumption_rate_suckling * 30) - difference_booster, 0)
     total_feed_needed_weanling_deficit = max((pig_list_28_to_88_days *  consumption_rate_weanlings * 30) - difference_pre_starter , 0)
-    total_feed_needed_grower_deficit = max(pig_list_88_to_148_days * consumption_rate_grower * 30 -  difference_starter, 0)
-    total_feed_needed_fattener_deficit = max(pig_list_greater_than_148_days * consumption_rate_fattener * 30 -  difference_grower, 0)
+    total_feed_needed_grower_deficit = max((pig_list_88_to_148_days * consumption_rate_grower * 30) -  difference_starter, 0)
+    total_feed_needed_fattener_deficit = max((pig_list_greater_than_148_days * consumption_rate_fattener * 30) -  difference_grower, 0)
 
     # Format the deficit
     total_feed_suckling_deficit_formatted = "{:.2f}".format(total_feed_needed_suckling_deficit)
