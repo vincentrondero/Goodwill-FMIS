@@ -294,13 +294,21 @@ def reports(request, user_type):
     else:
         messages.info(request, "no pigs registered for this month")
     # Count the number of vaccinated pigs
-    vaccinated_pigs = Pig.objects.annotate(vaccine_count=Count('vaccines')).filter(vaccine_count__gt=0).count()
+    all_vaccine_options = ["MH", "HPS", "PRRS", "PCV", "HCV1", "SIV", "APP", "HCV2", "PRV"]
+
+    vaccinated_pigs = Pig.objects.annotate(vaccine_count=Count('vaccines__vaccine', distinct=True))
+
+    for vaccine in all_vaccine_options:
+        vaccinated_pigs = vaccinated_pigs.filter(vaccine_count__gte=1, vaccines__vaccine=vaccine)
+
+    count_of_pigs_with_all_vaccines = vaccinated_pigs.count()
+    print(count_of_pigs_with_all_vaccines)
 
     # Calculate the percentage of vaccinated pigs
-    total_pigs = Pig.objects.exclude(exclude_q).count()
-    percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
+    total_pigs = len(pig_data)
+    total_pigs_exclude = Pig.objects.exclude(exclude_q).count()
+    percentage_vaccinated = (count_of_pigs_with_all_vaccines / total_pigs) * 100
     vaccine_counts = Vaccine.objects.values('vaccine').annotate(count=Count('pig_id', distinct=True))
-    all_vaccine_options = ["MH", "HPS", "PRRS", "PCV", "HCV1", "SIV", "APP", "HCV2", "PRV"]
     vaccinated_per_vaccine_counts = Vaccine.objects.values('vaccine').annotate(count=Count('pig_id', distinct=True))
     vaccine_counts_dict = {option: 0 for option in all_vaccine_options}
     vaccine_needed = {}
@@ -310,7 +318,7 @@ def reports(request, user_type):
 
     for option in all_vaccine_options:
         vaccinated_pigs_for_need = vaccine_counts_dict.get(option, 0)
-        vaccine_needed[option] = total_pigs - vaccinated_pigs_for_need
+        vaccine_needed[option] = total_pigs_exclude  - vaccinated_pigs_for_need
 
     
     # Update counts based on available data
@@ -468,7 +476,7 @@ def reports(request, user_type):
         "mortality_counts": json.dumps(list(mortality_counts)),
         "percentage_vaccinated": percentage_vaccinated,
         "total_pigs": total_pigs,
-        "vaccinated_pigs": vaccinated_pigs,
+        "count_of_pigs_with_all_vaccines": count_of_pigs_with_all_vaccines,
         "total_pigs_for_feeds":total_pigs_for_feeds,
         "total_feed_suckling_formatted":total_feed_suckling_formatted,
         "total_feed_weanling_formatted":total_feed_weanling_formatted,
@@ -1273,216 +1281,235 @@ def get_vaccine_data(request, pig_id):
     return JsonResponse({'vaccine_data': vaccine_data})
     
 def generate_sales_report(request):
-    # Get the current month and year
-    current_month = datetime.now()
-
-    # Filter PigSales for the current month
-    sales_data = PigSale.objects.filter(date__year=current_month.year, date__month=current_month.month)
-
-    # Create a buffer for the PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-
-    elements = []
-
-    # Create a custom title style
-    title_style = ParagraphStyle(
-        name='CustomTitleStyle',
-        fontSize=14,
-        textColor='black',  # Change the title text color
-        alignment=1,  # Center alignment
-    )
-    styles = getSampleStyleSheet()["Heading3"]
-    heading = getSampleStyleSheet()["Heading2"]
-
-    # Create a title for the report using the custom style
-    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
-    elements.append(Paragraph("Sales Report for " + current_month.strftime('%Y-%B'), style=title_style))
-    elements.append(Spacer(1, 12))
-
-    # Define the data for the table
-    table_data = [['Pig ID', 'Weight', 'Price', 'Date']]
-
-    total_sales = Decimal(0)
-    total_count = 0
-    weights = []
-
-    for sale in sales_data:
-        table_data.append([sale.pig.pig_id, sale.weight, sale.price, sale.date])
-        total_sales += sale.price
-        total_count += 1
-        weights.append(sale.weight)
-
-    average_weight = mean(weights) if weights else 0
-    
-    # Add a summary section
-    elements.append(Paragraph("Total Sales: Php %.2f" % total_sales, style=styles))
-    elements.append(Paragraph("Total Count: %d" % total_count, style=styles))
-    elements.append(Paragraph("Average Weight: %.2f" % average_weight, style=styles))
-
-    # Create a table
-    table = Table(table_data, colWidths=120, rowHeights=30)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('GRID', (0, 0), (-1, -1), 1, colors.white),
-    ]))
-
-    elements.append(table)
-    elements.append(Spacer(1, 12))
-
-    # Build the PDF document
-    doc.build(elements)
-    buffer.seek(0)
-
-    # Create a response with the PDF file
-    response = FileResponse(buffer, as_attachment=True, filename="sales_report.pdf")
-
     if request.method == 'POST':
-        return response
+        # Get selected month and year from the form
+        selected_month = request.POST.get('month')
+        selected_year = request.POST.get('year')
+        
+        # Example: Check if the selected values are correct (you can add more validation)
+        if selected_month and selected_year:
+            # Filter PigSales for the selected month and year
+            sales_data = PigSale.objects.filter(date__year=selected_year, date__month=selected_month)
+
+            # Create a buffer for the PDF
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+            elements = []
+
+            # Create a custom title style
+            title_style = ParagraphStyle(
+                name='CustomTitleStyle',
+                fontSize=14,
+                textColor='black',
+                alignment=1,
+            )
+            styles = getSampleStyleSheet()["Heading3"]
+            heading = getSampleStyleSheet()["Heading2"]
+
+            # Create a title for the report using the custom style
+            elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+            selected_date = datetime(int(selected_year), int(selected_month), 1)
+            elements.append(Paragraph("Sales Report for {}".format(selected_date.strftime('%Y-%B')), style=title_style))
+            elements.append(Spacer(1, 12))
+
+            # Define the data for the table
+            table_data = [['Pig ID', 'Weight', 'Price', 'Date']]
+
+            total_sales = Decimal(0)
+            total_count = 0
+            weights = []
+
+            for sale in sales_data:
+                table_data.append([sale.pig.pig_id, sale.weight, sale.price, sale.date])
+                total_sales += sale.price
+                total_count += 1
+                weights.append(sale.weight)
+
+            average_weight = mean(weights) if weights else 0
+
+            # Add a summary section
+            elements.append(Paragraph("Total Sales: Php {:.2f}".format(total_sales), style=styles))
+            elements.append(Paragraph("Total Count: {}".format(total_count), style=styles))
+            elements.append(Paragraph("Average Weight: {:.2f}".format(average_weight), style=styles))
+
+            # Create a table
+            table = Table(table_data, colWidths=120, rowHeights=30)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.white),
+            ]))
+
+            elements.append(table)
+            elements.append(Spacer(1, 12))
+
+            # Build the PDF document
+            doc.build(elements)
+            buffer.seek(0)
+
+            # Create a response with the PDF file
+            response = FileResponse(buffer, as_attachment=True, filename="sales_report.pdf")
+            return response
+
+    return render(request, 'your_template.html')
 
 def generate_mortality_report(request):
-    # Get the current month and year
-    current_month = datetime.now()
-
-    # Filter PigSales for the current month
-    moratlity_data = MortalityForm.objects.filter(date__year=current_month.year, date__month=current_month.month)
-
-    # Create a buffer for the PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-
-    elements = []
-
-    # Create a custom title style
-    title_style = ParagraphStyle(
-        name='CustomTitleStyle',
-        fontSize=14,
-        textColor='black',  # Change the title text color
-        alignment=1,  # Center alignment
-    )
-    styles = getSampleStyleSheet()["Heading3"]
-    heading = getSampleStyleSheet()["Heading2"]
-
-    # Create a title for the report using the custom style
-    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
-    elements.append(Paragraph("Mortality Report for " + current_month.strftime('%Y-%B'), style=title_style))
-    elements.append(Spacer(1, 12))
-
-    # Define the data for the table
-    table_data = [['', 'Pig ID', 'Cause', 'Location', 'Date']]
-
-    total_mortality = 0
-    top_cause = MortalityForm.objects.aggregate(max_value=Max('cause'))['max_value']
-    
-    for mortality in moratlity_data:
-        table_data.append([mortality.id, mortality.pig_id, mortality.cause, mortality.location, mortality.date])
-        total_mortality += 1
-
-    # Add a summary section
-    elements.append(Paragraph("Total Mortality: %d" % total_mortality, style=styles))
-    elements.append(Paragraph("Top Cause: %s" % top_cause, style=styles))
-
-    # Create a table
-    table = Table(table_data, colWidths=100, rowHeights=30)
-    table.setStyle(TableStyle([
-        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('GRID', (0, 0), (-1, -1), 1, colors.white),
-    ]))
-
-    elements.append(table)
-    elements.append(Spacer(1, 12))
-
-    # Build the PDF document
-    doc.build(elements)
-    buffer.seek(0)
-
-    # Create a response with the PDF file
-    response = FileResponse(buffer, as_attachment=True, filename="mortality_report.pdf")
-
     if request.method == 'POST':
+        # Get the selected month and year from the form
+        selected_month = int(request.POST.get('month'))
+        selected_year = int(request.POST.get('year'))
+
+        # Filter MortalityForm based on the selected month and year
+        moratlity_data = MortalityForm.objects.filter(date__year=selected_year, date__month=selected_month)
+
+        # Create a buffer for the PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+        elements = []
+
+        # Create a custom title style
+        title_style = ParagraphStyle(
+            name='CustomTitleStyle',
+            fontSize=14,
+            textColor='black',  # Change the title text color
+            alignment=1,  # Center alignment
+        )
+        styles = getSampleStyleSheet()["Heading3"]
+        heading = getSampleStyleSheet()["Heading2"]
+
+        total_mortality = 0
+        top_cause = MortalityForm.objects.filter(date__year=selected_year, date__month=selected_month).aggregate(max_value=Max('cause'))['max_value']
+
+        # Create a title for the report using the custom style
+        selected_date = datetime(int(selected_year), int(selected_month), 1)
+        elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+        elements.append(Paragraph("Mortality Report for " + selected_date.strftime('%Y-%B'), style=title_style))
+        elements.append(Spacer(1, 12))
+
+        # Define the data for the table
+        table_data = [['', 'Pig ID', 'Cause', 'Location', 'Date']]
+
+        for mortality in moratlity_data:
+            table_data.append([mortality.id, mortality.pig_id, mortality.cause, mortality.location, mortality.date])
+            total_mortality += 1
+
+        # Add a summary section
+        elements.append(Paragraph("Total Mortality: %d" % total_mortality, style=styles))
+        elements.append(Paragraph("Top Cause: %s" % top_cause, style=styles))
+
+        # Create a table
+        table = Table(table_data, colWidths=100, rowHeights=30)
+        table.setStyle(TableStyle([
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.white),
+        ]))
+
+        elements.append(table)
+        elements.append(Spacer(1, 12))
+
+        # Build the PDF document
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create a response with the PDF file
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="mortality_report.pdf"'
+        response.write(buffer.getvalue())
         return response
-    
+
+    return render(request, 'your_form_template.html')
+
 def generate_weanling_report(request):
-    # Get the current month and year
-    current_month = datetime.now()
-
-    weanling_data = Weanling.objects.filter(date__year=current_month.year, date__month=current_month.month)
-    recent_pigs = Pig.objects.filter(date__year=current_month.year, date__month=current_month.month)
-    recent_pigs_total = len(recent_pigs)
-     # Create a buffer for the PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-
-    total_weanling_count = 0
-    elements = []
-
-    # Create a custom title style
-    title_style = ParagraphStyle(
-        name='CustomTitleStyle',
-        fontSize=14,
-        textColor='black',  # Change the title text color
-        alignment=1,  # Center alignment
-    )
-    styles = getSampleStyleSheet()["Heading3"]
-    heading = getSampleStyleSheet()["Heading2"]
-
-    # Create a title for the report using the custom style
-    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
-    elements.append(Paragraph("Vaccine Report for " + current_month.strftime('%Y-%B'), style=title_style))
-    elements.append(Spacer(1, 12))
-
-    # Define the data for the table
-    table_data = [['', 'Pig ID', 'Date']]
-
-    for weanlings in weanling_data:
-        table_data.append([weanlings.id, weanlings.pig_id, weanlings.date])
-        total_weanling_count += 1
-    
-    wean_pct = 0
-    if recent_pigs_total != 0:
-        wean_pct += (total_weanling_count / recent_pigs_total) *100
-    else:
-        messages.info(request, "No pigs to wean yet")
-
-    elements.append(Paragraph("Total Weanling Count: %d" % total_weanling_count, style=styles))
-    elements.append(Paragraph("Total Percentage: %d" % wean_pct + "%", style=styles))
-
-     # Create a table
-    table = Table(table_data, colWidths=130, rowHeights=30)
-    table.setStyle(TableStyle([
-        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('GRID', (0, 0), (-1, -1), 1, colors.white),
-    ]))
-
-    elements.append(table)
-    elements.append(Spacer(1, 12))
-
-    # Build the PDF document
-    doc.build(elements)
-    buffer.seek(0)
-
-    # Create a response with the PDF file
-    response = FileResponse(buffer, as_attachment=True, filename="weanling_report.pdf")
-
     if request.method == 'POST':
+        # Get the selected month and year from the form
+        selected_month = int(request.POST.get('month'))
+        selected_year = int(request.POST.get('year'))
+
+        # Filter Weanling based on the selected month and year
+        weanling_data = Weanling.objects.filter(date__year=selected_year, date__month=selected_month)
+        
+        # Filter recent pigs for the selected month and year
+        recent_pigs = Pig.objects.filter(date__year=selected_year, date__month=selected_month)
+        recent_pigs_total = len(recent_pigs)
+
+        # Create a buffer for the PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+        total_weanling_count = 0
+        elements = []
+
+        # Create a custom title style
+        title_style = ParagraphStyle(
+            name='CustomTitleStyle',
+            fontSize=14,
+            textColor='black',  # Change the title text color
+            alignment=1,  # Center alignment
+        )
+        styles = getSampleStyleSheet()["Heading3"]
+        heading = getSampleStyleSheet()["Heading2"]
+
+        # Create a title for the report using the custom style
+        selected_date = datetime(int(selected_year), int(selected_month), 1)
+        elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+        elements.append(Paragraph("Weanling Report for " + selected_date.strftime('%Y-%B'), style=title_style))
+        elements.append(Spacer(1, 12))
+
+        # Define the data for the table
+        table_data = [['', 'Pig ID', 'Date']]
+
+        for weanling in weanling_data:
+            table_data.append([weanling.id, weanling.pig_id, weanling.date])
+            total_weanling_count += 1
+
+        wean_pct = 0
+        if recent_pigs_total != 0:
+            wean_pct += (total_weanling_count / recent_pigs_total) * 100
+        else:
+            messages.info(request, "No pigs to wean yet")
+
+        elements.append(Paragraph("Total Weanling Count: %d" % total_weanling_count, style=styles))
+        elements.append(Paragraph("Total Percentage: %d" % wean_pct + "%", style=styles))
+
+        # Create a table
+        table = Table(table_data, colWidths=130, rowHeights=30)
+        table.setStyle(TableStyle([
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.white),
+        ]))
+
+        elements.append(table)
+        elements.append(Spacer(1, 12))
+
+        # Build the PDF document
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create a response with the PDF file
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="weanling_report.pdf"'
+        response.write(buffer.getvalue())
         return response
+
+    return render(request, 'your_form_template.html')
        
 def generate_vaxx_report(request):
     # Get the current month and year
@@ -1695,76 +1722,81 @@ def generate_feed_report(request):
         return response
     
 def feedExpensesReport(request):
-    # Get the current month and year
-    current_month = datetime.now()   
-
-    feeds_expenses = FeedsInventory.objects.filter(date__year=current_month.year, date__month=current_month.month)
-
-    # Create a buffer for the PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-
-    elements = []
-
-    # Create a custom title style
-    title_style = ParagraphStyle(
-        name='CustomTitleStyle',
-        fontSize=14,
-        textColor='black',  # Change the title text color
-        alignment=1,  # Center alignment
-    )
-    styles = getSampleStyleSheet()["Heading3"]
-    heading = getSampleStyleSheet()["Heading2"]
-
-    total_expenses = Decimal(0)
-
-    # Create a title for the report using the custom style
-    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
-    elements.append(Paragraph("Feeds Expenses for " + current_month.strftime('%Y-%B'), style=title_style))
-    elements.append(Spacer(1, 12))
-
-    # Define the data for the table
-    table_data = [['Ration Type', 'Quantity (sacks)', 'Cost', 'Date']]
-
-    for feedsExp in feeds_expenses:
-        table_data.append([feedsExp.feeds_ration, feedsExp.quantity, feedsExp.cost, feedsExp.date])
-        total_expenses += feedsExp.cost
-
-    totalExpStr = str(total_expenses)
-
-    # Query to aggregate the sum of 'cost' for each unique 'feeds_ration'
-    results = FeedsInventory.objects.values('feeds_ration').filter(date__year=current_month.year, date__month=current_month.month).annotate(total_cost=Sum('cost'))
-
-    # Add results to the list of paragraph elements
-    for result in results:
-        feeds_ration = result['feeds_ration']
-        total_cost = result['total_cost']
-        elements.append(Paragraph(f"{feeds_ration}: {total_cost}", styles))
-
-    elements.append(Paragraph("Total Cost: " + totalExpStr, style=styles))
-
-    # Create a table
-    table = Table(table_data, colWidths=130, rowHeights=30)
-    table.setStyle(TableStyle([
-        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('GRID', (0, 0), (-1, -1), 1, colors.white),
-    ]))
-
-    elements.append(table)
-    elements.append(Spacer(1, 12))
-
-    # Build the PDF document
-    doc.build(elements)
-    buffer.seek(0)
-
-    # Create a response with the PDF file
-    response = FileResponse(buffer, as_attachment=True, filename="feedsExpenses_report.pdf")
-
     if request.method == 'POST':
+        # Get the selected month and year from the form
+        selected_month = int(request.POST.get('month'))
+        selected_year = int(request.POST.get('year'))
+
+        # Filter FeedsInventory based on the selected month and year
+        feeds_expenses = FeedsInventory.objects.filter(date__year=selected_year, date__month=selected_month)
+
+        # Create a buffer for the PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+        elements = []
+
+        # Create a custom title style
+        title_style = ParagraphStyle(
+            name='CustomTitleStyle',
+            fontSize=14,
+            textColor='black',  # Change the title text color
+            alignment=1,  # Center alignment
+        )
+        styles = getSampleStyleSheet()["Heading3"]
+        heading = getSampleStyleSheet()["Heading2"]
+
+        total_expenses = Decimal(0)
+
+        # Create a title for the report using the custom style
+        elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+        elements.append(Paragraph("Feeds Expenses for " + datetime(selected_year, selected_month, 1).strftime('%Y-%B'), style=title_style))
+        elements.append(Spacer(1, 12))
+
+        # Define the data for the table
+        table_data = [['Ration Type', 'Quantity (sacks)', 'Cost', 'Date']]
+
+        for feedsExp in feeds_expenses:
+            table_data.append([feedsExp.feeds_ration, feedsExp.quantity, feedsExp.cost, feedsExp.date])
+            total_expenses += feedsExp.cost
+
+        totalExpStr = str(total_expenses)
+
+        # Query to aggregate the sum of 'cost' for each unique 'feeds_ration'
+        results = FeedsInventory.objects.values('feeds_ration').filter(date__year=selected_year, date__month=selected_month).annotate(total_cost=Sum('cost'))
+
+        # Add results to the list of paragraph elements
+        for result in results:
+            feeds_ration = result['feeds_ration']
+            total_cost = result['total_cost']
+            elements.append(Paragraph(f"{feeds_ration}: {total_cost}", styles))
+
+        elements.append(Paragraph("Total Cost: " + totalExpStr, style=styles))
+
+        # Create a table
+        table = Table(table_data, colWidths=130, rowHeights=30)
+        table.setStyle(TableStyle([
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.white),
+        ]))
+
+        elements.append(table)
+        elements.append(Spacer(1, 12))
+
+        # Build the PDF document
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Create a response with the PDF file
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="feedsExpenses_report.pdf"'
+        response.write(buffer.getvalue())
         return response
+
+    return render(request, 'your_form_template.html')

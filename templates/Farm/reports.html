@@ -5,7 +5,7 @@
 <div id="months"  style="display: none;">{{ months|safe }}</div>
 <div id="counts"  style="display: none;">{{ counts|safe|default:"[]" }}</div>
 <div id="totalPigs" style="display: none;">{{ total_pigs }}</div>
-<div id="vaccinatedPigs" style="display: none;">{{ vaccinated_pigs }}</div>
+<div id="vaccinatedPigs" style="display: none;">{{ count_of_pigs_with_all_vaccines }}</div>
 <div id="salesData" style="display: none;">{{ sale_counts|safe }}</div>
 <div id="saleMonths" style="display: none;" >{{ sale_months|safe }}</div>
 <div id="mortalityData" style="display: none;">{{ mortality_counts|safe }}</div>
@@ -24,45 +24,160 @@
 
 <div class="col">
     <div class="row">
-        <div class="navbar row-1 my-1 d-flex flex-row justify-content-between" style="height: 50px;">
-            <form method="post" action="{% url 'generate_sales_report' %}">
-                {% csrf_token %}
-                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                        Sales Report
-                    </button>
-            </form>
-            <form method="post" action="{% url 'generate_vaxx_report' %}">
-                {% csrf_token %}
-                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                    Vaccination Report
-                </button>
-            </form>
-            <form method="post" action="{% url 'generate_feed_report' %}">
-                {% csrf_token %}
-                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                    Feeds Report
-                </button>
-            </form>
-            <form method="post" action="{% url 'feedExpensesReport' %}">
-                {% csrf_token %}
-                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                    Feeds Expenses
-                </button>
-            </form>
-            <form method="post" action="{% url 'generate_weanling_report' %}">
-                {% csrf_token %}
-                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                    Weanling Report
-                </button>
-            </form>
-            <form method="post" action="{% url 'generate_mortality_report' %}">
-                {% csrf_token %}
-                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
-                        Mortality Reports
-                    </button>
-            </form>
+        <div class="navbar row-1 my-1 d-flex justify-content-between" style="height: 50px;">
+            <div class="d-flex align-items-center">
+                <button class="custom_button" id="salesReportButton" style="width: 200px; border-radius: 20px;">Sales Report</button>
+            </div>
+            <div class="d-flex align-items-center">
+                <form method="post" action="{% url 'generate_vaxx_report' %}">
+                    {% csrf_token %}
+                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">Vaccination Report</button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center">
+                <form method="post" action="{% url 'generate_feed_report' %}">
+                    {% csrf_token %}
+                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">Feeds Report</button>
+                </form>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="custom_button" id="feedExpensesReportButton" style="width: 200px; border-radius: 20px;">Feeds Expenses</button>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="custom_button" id="weanlingReportButton" style="width: 200px; border-radius: 20px;">Weanling Report</button>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="custom_button" id="mortalityReportButton" style="width: 200px; border-radius: 20px;">Mortality Reports</button>
+            </div>
         </div>
+    </div>    
+    
+    
+    <!-- Separate Modals for Each Report -->
+    <div class="modal edit-pig-container rounded m-5 p-5" style="width: 40%; height: 50%; overflow: scroll;" id="salesReportModal">
+        <form method="post" action="{% url 'generate_sales_report' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="year">Select Year:</label>
+                <input type="text" name="year" id="year" value="2023">
+            </div>
+            <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                Generate Sales Report
+            </button>
+        </form>
+        <button id="closeSalesModal">Close</button>
     </div>
+    
+    <div class="modal edit-pig-container rounded m-5 p-5" style="width: 40%; height: 50%; overflow: scroll;" id="feedExpensesReportModal">
+        <form method="post" action="{% url 'feedExpensesReport' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="year">Select Year:</label>
+                <input type="text" name="year" id="year" value="2023">
+            </div>
+            <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                Feeds Expenses
+            </button>
+        </form> 
+        <button id="closeFeedExpensesModal" class="close-button">Close</button>    
+    </div>
+    <div class="modal edit-pig-container rounded m-5 p-5" style="width: 40%; height: 50%; overflow: scroll;" id="weanlingReportModal">
+        <form method="post" action="{% url 'generate_weanling_report' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="year">Select Year:</label>
+                <input type="text" name="year" id="year" value="2023">
+            </div>
+            <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                Generate Weanling Report
+            </button>
+        </form>
+        <button id="closeWeanlingModal" class="close-button">Close</button>
+    </div>    
+    <div class="modal edit-pig-container rounded m-5 p-5" style="width: 40%; height: 50%; overflow: scroll;" id="mortalityReportModal">
+        <form method="post" action="{% url 'generate_mortality_report' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="year">Select Year:</label>
+                <input type="text" name="year" id="year" value="2023">
+            </div>
+            <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                Generate Mortality Report
+            </button>
+        </form>
+        <button id="closeMortalityModal" class="close-button">Close</button>
+    </div>
+    
+    
+    
     <div class="row">
         <div class="d-flex justify-content-around my-2">
             <button id="showPigSalesButton" class="menu_button mx-2" style="width: 70%;">Pig Sales</button>

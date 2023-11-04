@@ -711,6 +711,9 @@ $('#search-sow-input').on('input', function () {
                                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
                                                     }]
                                                 },
+                                                options: {
+                                                    responsive: false,
+                                                },
                                             });
 
                                             // Create the line chart
@@ -739,6 +742,9 @@ $('#search-sow-input').on('input', function () {
                                             var lineChart = new Chart(lineChartCanvas, {
                                                 type: 'line',
                                                 data: lineChartData,
+                                                options: {
+                                                    responsive: false,
+                                                },
                                             });
 
                                         } else {
@@ -1065,7 +1071,7 @@ document.addEventListener("DOMContentLoaded", function () {
         cutout: '65%',
         plugins: {
           legend: {
-            display: false,
+            display: true,
           },
           tooltip: {
             enabled: true,
@@ -1075,6 +1081,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 var value = context.parsed || 0;
                 return label + ': ' + value.toFixed(2) + '%';
               },
+            },
+          },
+          title: {
+            display: true,
+            text: "Vaccination Rate",
+            align: 'center',
+            font: {
+                weight: 'bold',
             },
           },
         },
@@ -1201,33 +1215,34 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
 document.addEventListener("DOMContentLoaded", function () {
     var mortalityDatesData = JSON.parse(document.getElementById("mortalityDates").textContent);
     var mortalityCountsData = JSON.parse(document.getElementById("mortalityData").textContent);
 
-    // Get your existing select element
-    var selectMortalityYear = document.getElementById("selectMortalityYear");
+     // Get your existing select element
+     var selectMortalityYear = document.getElementById("selectMortalityYear");
 
-    // Create an array to store unique years from the data
-    var mortalityYears = [...new Set(mortalityDatesData.map(date => date.split('-')[0]))];
-
-    // Add the "All Years" option
-    mortalityYears.unshift("All Years");
-
-    // Populate the dropdown with the year options
-    mortalityYears.forEach(function (year) {
-        var option = document.createElement("option");
-        option.value = year;
-        option.text = year;
-        selectMortalityYear.appendChild(option);
-    });
-
-    // Store the default year as the current year
-    var defaultYear = new Date().getFullYear();
-
-    // Set the default selection to the current year
-    selectMortalityYear.value = defaultYear.toString();
-
+     // Create an array to store unique years from the data
+     var mortalityYears = [...new Set(mortalityDatesData.map(date => date.split('-')[0]))];
+ 
+     // Add the "All Years" option
+     mortalityYears.unshift("All Years");
+ 
+     // Populate the dropdown with the year options
+     mortalityYears.forEach(function (year) {
+         var option = document.createElement("option");
+         option.value = year;
+         option.text = year;
+         selectMortalityYear.appendChild(option);
+     });
+ 
+     // Store the default year as the current year
+     var defaultYear = new Date().getFullYear();
+ 
+     // Set the default selection to the current year
+     selectMortalityYear.value = defaultYear.toString();
+ 
     // Create an array of all months of the year
     const allMonths = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -1240,7 +1255,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         mortalityDatesData.forEach((monthYear, index) => {
             const [year, month] = monthYear.split('-');
-            if (year == selectedYear || selectedYear === "All Years") {
+            if (year == selectedYear) {
                 const monthIndex = parseInt(month, 10) - 1;
                 if (!isNaN(monthIndex)) {
                     monthsData[monthIndex] += mortalityCountsData[index];
@@ -1271,6 +1286,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         },
         options: {
+            responsive: false,
             scales: {
                 x: {
                     title: {
@@ -1297,7 +1313,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Function to update the mortality chart based on the selected year
     function updateMortalityChart() {
         var selectedYear = selectMortalityYear.value;
-        var filteredMortalityCounts = mapDataToMonths(selectedYear);
+        var filteredMortalityCounts = [];
+
+        if (selectedYear === "All Years") {
+            // If "All Years" is selected, sum counts across all years
+            for (var i = 0; i < currentYearCounts.length; i++) {
+                filteredMortalityCounts.push(currentYearCounts[i]);
+            }
+        } else {
+            // Get the counts for the selected year
+            filteredMortalityCounts = mapDataToMonths(selectedYear);
+        }
 
         // Update the chart data
         mortalityChart.data.datasets[0].data = filteredMortalityCounts;
@@ -1307,11 +1333,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add an event listener to the select element
     selectMortalityYear.addEventListener("change", updateMortalityChart);
 });
-
-
-
-
-
 
 document.addEventListener("DOMContentLoaded", function () {
     var totalWeanlings = parseInt(document.getElementById("totalWeanlings").textContent);
@@ -1423,8 +1444,8 @@ document.addEventListener("DOMContentLoaded", function () {
             type: 'bar',
             data: {
                 labels: [
-                    "January", "February", "March", "April", "May", "June", "July",
-                    "August", "September", "October", "November", "December"
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                    "Aug", "Sep", "Oct", "Nov", "Dec",
                 ],
                 datasets: [
                     {
@@ -1437,6 +1458,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ],
             },
             options: {
+                responsive: false,
                 scales: {
                     x: {
                         title: {
@@ -1586,6 +1608,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }]
         },
         options: {
+            responsive: false,
             indexAxis: 'y',
             scales: {
                 x: {
@@ -1642,6 +1665,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ]
         },
         options: {
+            responsive: false,
             scales: {
                 y: {
                     beginAtZero: true
@@ -1743,6 +1767,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ],
             },
             options: {
+                responsive: false,
                 scales: {
                     y: {
                         beginAtZero: true
@@ -1953,8 +1978,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                             // Use the 'ave_litter_size' field for the Y-axis data
                                             return sow.ave_litter_size;
                                         }),
-                                        borderColor: '#FF7373',
-                                        backgroundColor:'#FF7373',
+                                        borderColor: 'rgba(75, 192, 192, 1)',
                                         fill: false
                                     }]
                                 };
@@ -2034,7 +2058,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-
 $(document).ready(function () {
     $("#print-button").click(function () {
       // Get the barcode source
@@ -2079,7 +2102,7 @@ function openVaccineOverlay(pigId) {
 
                 // Create the table headers
                 var headerRow = table.insertRow(0);
-                var headers = ["Date", "Vaccine", "Purpose", "Dosage(mg)"];
+                var headers = ["Date", "Vaccine", "Purpose", "Dosage"];
                 for (var i = 0; i < headers.length; i++) {
                     var headerCell = document.createElement("th");
                     headerCell.textContent = headers[i];
@@ -2120,3 +2143,48 @@ function closeVaccineOverlay() {
     overlay.style.display = "none";
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+    // Get references to the buttons and modals
+    const salesReportButton = document.getElementById("salesReportButton");
+    const feedExpensesReportButton = document.getElementById("feedExpensesReportButton");
+    const weanlingReportButton = document.getElementById("weanlingReportButton");
+    const mortalityReportButton = document.getElementById("mortalityReportButton");
+
+    const salesReportModal = document.getElementById("salesReportModal");
+    const feedExpensesReportModal = document.getElementById("feedExpensesReportModal");
+    const weanlingReportModal = document.getElementById("weanlingReportModal");
+    const mortalityReportModal = document.getElementById("mortalityReportModal");
+
+    // Function to show a modal
+    function showModal(modal) {
+        modal.style.display = "block";
+    }
+
+    // Function to hide a modal
+    function hideModal(modal) {
+        modal.style.display = "none";
+    }
+
+    // Event listeners to open the modals
+    salesReportButton.addEventListener("click", () => showModal(salesReportModal));
+    feedExpensesReportButton.addEventListener("click", () => showModal(feedExpensesReportModal));
+    weanlingReportButton.addEventListener("click", () => showModal(weanlingReportModal));
+    mortalityReportButton.addEventListener("click", () => showModal(mortalityReportModal));
+
+    // Event listeners to close the modals
+    document.getElementById("closeSalesModal").addEventListener("click", () => {
+        hideModal(salesReportModal);
+    });
+
+    document.getElementById("closeFeedExpensesModal").addEventListener("click", () => {
+        hideModal(feedExpensesReportModal);
+    });
+
+    document.getElementById("closeWeanlingModal").addEventListener("click", () => {
+        hideModal(weanlingReportModal);
+    });
+
+    document.getElementById("closeMortalityModal").addEventListener("click", () => {
+        hideModal(mortalityReportModal);
+    });
+});
