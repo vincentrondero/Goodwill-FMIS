@@ -400,9 +400,9 @@ def reports(request, user_type):
     total_feed_fattener_deficit_formatted = "{:.2f}".format(total_feed_needed_fattener_deficit)
 
     total_feed_needed_suckling_cost = total_feed_needed_suckling_deficit * 64
-    total_feed_needed_weanling_cost = total_feed_needed_weanling_deficit * 64
-    total_feed_needed_grower_cost =  total_feed_needed_grower_deficit * 60
-    total_feed_needed_fattener_cost =  total_feed_needed_fattener_deficit * 56
+    total_feed_needed_weanling_cost = total_feed_needed_weanling_deficit * 44
+    total_feed_needed_grower_cost =  total_feed_needed_grower_deficit * 30
+    total_feed_needed_fattener_cost =  total_feed_needed_fattener_deficit * 28
 
     # Format the cost results
     total_feed_suckling_cost_formatted = "{:.2f}".format(total_feed_needed_suckling_cost)
