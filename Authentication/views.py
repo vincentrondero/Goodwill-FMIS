@@ -529,7 +529,6 @@ def reports(request, user_type):
 def data_entry(request, user_type):
     # Get a list of pig IDs that have a PigSale entry
     current_date = timezone.now().date()
-    eighty_eight_days_ago = date.today() - timedelta(days=88)
     pig_sales_ids = PigSale.objects.values_list('pig_id', flat=True)
     weanling_pig_ids = Weanling.objects.values_list('pig_id', flat=True)
 
@@ -540,9 +539,8 @@ def data_entry(request, user_type):
     sows = Sow.objects.all()
     pigs = Pig.objects.exclude(id__in=excluded_pigs)
     piglets = Pig.objects.exclude(id__in=excluded_piglets )
-    resulting_piglets = excluded_piglets.filter(dob__gte=eighty_eight_days_ago)
 
-    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows, 'piglets': piglets, 'date': current_date,'resulting_piglets':resulting_piglets})
+    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows, 'piglets': piglets, 'date': current_date})
 
 
 
