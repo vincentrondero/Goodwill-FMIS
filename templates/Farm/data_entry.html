@@ -294,9 +294,7 @@
                         <select class="form-select" id="pigID" name="pig_id">
                             <option value="" selected>Select a Pig</option>
                             {% for pig in resulting_piglets %}
-                            {% if pig.id not in pig_sales_ids %}
                             <option value="{{ pig.id }}">{{ pig.pig_id }}</option>
-                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>
