@@ -970,12 +970,18 @@ def save_feeds_inventory(request, user_type):
 
 def add_feed_stock_update(request, user_type):
     if request.method == 'POST':
+        ration = request.POST.get('ration')
         count_update = request.POST.get('count_update')
         date = request.POST.get('date')
         verify_by = request.POST.get('verify_by')
 
-        # Save the feed stock update to the database
-        feed_stock_update = FeedStockUpdate(count_update=count_update, date=date, verify_by=verify_by)
+
+        feed_stock_update = FeedStockUpdate(
+            ration=ration, 
+            count_update=count_update,
+            date=date,
+            verify_by=verify_by
+        )
         feed_stock_update.save()
 
         messages.success(request, 'Feeds Stock Updated')
