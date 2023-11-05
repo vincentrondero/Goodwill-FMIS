@@ -58,8 +58,8 @@
         <form method="post" action="{% url 'generate_sales_report' %}">
             {% csrf_token %}
             <div class="form-group">
-                <label for="month" style="width: 50%; display: inline-block;">Select Month:</label>
-                <select name="month" id="month" style="width: 50%; display: inline-block;">
+                <label for="month">Select Month:</label>
+                <select name="month" id="month">
                     <option value="01">January</option>
                     <option value="02">February</option>
                     <option value="03">March</option>
@@ -72,23 +72,17 @@
                     <option value="10">October</option>
                     <option value="11">November</option>
                     <option value="12">December</option>
-                </select>
+                </select>                
             </div>
             <div class="form-group">
-                <label for="year" style="width: 50%; display: inline-block;">Select Year:</label>
-                <input type="text" name "year" id="year" value="2023" style="width: 50%; display: inline-block;">
+                <label for="year">Select Year:</label>
+                <input type="text" name="year" id="year" value="2023">
             </div>
-            <div class="form-group" style="width: 100%; text-align: center; margin-top: 20px;">
-                <button class="custom_button" type="submit" style="width: 45%; border-radius: 20px; background-color: #ff7b7b; color: #FFFFFF">
-                    Generate Sales Report
-                </button>
-            </div>
-        </form>
-        <div class="form-group text-center" style="margin-top: 20px;">
-            <button id="closeSalesModal" class="custom_button" style="width: 45%; border-radius: 20px; background-color: #ccc;">
-                Cancel
+            <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                Generate Sales Report
             </button>
-        </div>
+        </form>
+        <button id="closeSalesModal">Close</button>
     </div>
     
     <div class="modal edit-pig-container rounded m-5 p-5" style="width: 40%; height: 50%; overflow: scroll;" id="feedExpensesReportModal">
