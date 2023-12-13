@@ -1949,7 +1949,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             var pieChart = new Chart(pieChartCanvas, {
                                 type: 'pie',
                                 data: {
-                                    labels: ['Alive', 'MK', 'SB', 'Mffd'],
+                                    labels: ['Alive', 'Mercy Killing', 'Still Birth', 'Mummfied'],
                                     datasets: [{
                                         data: [combinedData.alive, combinedData.mk, combinedData.sb, combinedData.mffd],
                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
