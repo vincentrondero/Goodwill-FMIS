@@ -614,12 +614,13 @@ def set_sched(request, user_type):
     all_tasks = Task.objects.all()
     today = date.today()
     today_tasks = Task.objects.filter(due_date=today)
+    sow_list = Sow.objects.all()
 
     # Filter tasks based on their is_done field
     todo_tasks = all_tasks.filter(is_done=False)
     done_tasks = all_tasks.filter(is_done=True)
 
-    return render(request, "Farm/set_sched.html", {"today_tasks": today_tasks, "todo_tasks": todo_tasks, "done_tasks": done_tasks, "user_type": user_type})
+    return render(request, "Farm/set_sched.html", {"today_tasks": today_tasks, "todo_tasks": todo_tasks, "done_tasks": done_tasks, "user_type": user_type, "sow_list":sow_list})
 
 
 
